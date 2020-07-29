@@ -10,9 +10,9 @@ import SwiftUI
 
 
 //Our ViewModel
-class EmojiMemoryGame {
+class EmojiMemoryGame : ObservableObject {
     // Private model, only acessible by ViewModel
-    private var game : MemoryGame<String> = EmojiMemoryGame.createMemoryGame()
+    @Published private var game : MemoryGame<String> = EmojiMemoryGame.createMemoryGame()
         
     static func createMemoryGame() -> MemoryGame<String> {
         let emojis = ["👻","🎃","☠️","🕷"]
