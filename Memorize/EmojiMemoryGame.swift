@@ -14,7 +14,7 @@ class EmojiMemoryGame : ObservableObject {
     // Private model, only acessible by ViewModel
     @Published private var game : MemoryGame<String> = EmojiMemoryGame.createMemoryGame()
         
-    static func createMemoryGame() -> MemoryGame<String> {
+    private static func createMemoryGame() -> MemoryGame<String> {
         _ = ["👻","🎃","☠️","🕷"]
         let animals = ["🦙","🦛","🐈","🦘","🦜","🦧","🐘","🦮","🦥"]
         return MemoryGame<String>(numberOfPairsOfCards: animals.count) {pairIndex in
@@ -33,5 +33,9 @@ class EmojiMemoryGame : ObservableObject {
     // MARK: - User Intent(s)
     func choose(card : MemoryGame<String>.Card) {
         game.choose(card: card)
+    }
+    
+    func resetGame() {
+        game = EmojiMemoryGame.createMemoryGame()
     }
 }

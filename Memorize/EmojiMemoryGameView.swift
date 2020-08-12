@@ -12,18 +12,30 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var vmEmojiMemoryGame: EmojiMemoryGame
     
     var body: some View {
-        Grid(vmEmojiMemoryGame.cards) { card in
-            CardView(card: card).onTapGesture {
-                self.vmEmojiMemoryGame.choose(card: card)
+        VStack {
+            Grid(vmEmojiMemoryGame.cards) { card in
+                CardView(card: card).onTapGesture {
+                    withAnimation(.linear(duration: 0.6)) {
+                        self.vmEmojiMemoryGame.choose(card: card)
+                    }
+                }
+                .padding(self.cardPadding)
             }
-            .padding(self.cardPadding)
+            .padding()
+            .foregroundColor(Color.orange)
+            Button(action: {
+                withAnimation(.easeInOut(duration: 1)) {
+                    self.vmEmojiMemoryGame.resetGame()
+                }
+            }, label: {Text("New Game")})
         }
-        .padding()
-        .foregroundColor(Color.orange)
+        
+        
+        
     }
     
     //MARK: Drawing Constants
-    let cardPadding : CGFloat = 5
+    private let cardPadding : CGFloat = 5
 }
 
 struct CardView : View {
@@ -35,30 +47,52 @@ struct CardView : View {
         }
     }
     
-    func body(for size : CGSize) -> some View {
-        ZStack {
-            if card.isFaceUp {
-                RoundedRectangle(cornerRadius: cornerRadius).fill(Color.white)
-                RoundedRectangle(cornerRadius: cornerRadius).stroke(lineWidth: edgeLineWidth)
-                Text(self.card.content)
-            }
-            else {
-                if !card.isMatched {
-                    RoundedRectangle(cornerRadius: cornerRadius).fill()
-                }
-                
-            }
-            
+    @State private var animatedBonusRemaining : Double = 0
+    
+    private func startBonusTimeAnimation() {
+        animatedBonusRemaining = card.bonusRemaining
+        withAnimation(.linear(duration: card.bonusTimeRemaining)) {
+            animatedBonusRemaining = 0
         }
-        .font(Font.system(size: fontSize(for: size)))
+    }
+    
+    @ViewBuilder
+    private func body(for size : CGSize) -> some View {
+        if card.isFaceUp || !card.isMatched {
+            ZStack {
+                Group {
+                    if card.isConsumingBonusTime {
+                        // iOS drawing, 0.0 is upper left, and increasing down and right
+                        // clockwise backwards
+                        Pie(startAngle: Angle.degrees(0-90), endAngle: Angle.degrees(-animatedBonusRemaining*360-90),
+                            clockwise: true)
+                            .onAppear {
+                                self.startBonusTimeAnimation()
+                        }
+                    } else {
+                        Pie(startAngle: Angle.degrees(0-90), endAngle: Angle.degrees(-card.bonusRemaining*360-90),
+                        clockwise: true)
+                    }
+                }
+                .padding(self.cardPadding).opacity(self.cardOpacity)
+                
+                Text(self.card.content)
+                    .font(Font.system(size: fontSize(for: size)))
+                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+                    .animation(card.isMatched ? Animation.linear(duration: 1).repeatForever(autoreverses: false) : .default)
+            }
+            .cardify(isFaceUp: card.isFaceUp)
+            .transition(AnyTransition.scale)
+        }
     }
     
     //MARK: Drawing Constants
-    let cornerRadius : CGFloat = 10.0
-    let edgeLineWidth : CGFloat = 3
-    func fontSize(for size : CGSize) -> CGFloat {
-        min(size.width, size.height) * 0.75
+    
+    private func fontSize(for size : CGSize) -> CGFloat {
+        min(size.width, size.height) * 0.7
     }
+    private let cardPadding : CGFloat = 5
+    private let cardOpacity : Double = 0.4
     
 }
 
@@ -90,6 +124,8 @@ struct CardView : View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        EmojiMemoryGameView(vmEmojiMemoryGame: EmojiMemoryGame())
+        let game = EmojiMemoryGame()
+        game.choose(card: game.cards[0])
+        return EmojiMemoryGameView(vmEmojiMemoryGame: game)
     }
 }
