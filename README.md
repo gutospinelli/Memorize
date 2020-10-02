@@ -60,6 +60,26 @@ In our viewModel we use @Published property wrapper on our Model variable.  That
 
 The view model also lists the intents of our user, and that's just two of them: to choose a card (and try a match) and to reset the game.
 
+## Screenshots
+
+* **Start a game**
+
+  * The grid layout of cards start organized in perfect rows and cols. When the user intents to start a new game, we scramble our cards.
+  
+  <img src="./images/newgameorganized.png" width="320" height="568"/>
+  
+  <img src="./images/newgamescramble.png" width="320" height="568"/>
+  
+ 
+* **Matching**
+
+  * When the user intents to chose a card and goes for a match, a nice animation that rotates the matched cards is shown and the user scores points. If a match does not occur, the user wastes time for a bonus quick match score! The time to gain bonus is represented by the animated time pie behind the emoticon text.
+  
+  <img src="./images/parrotmatch.png" width="320" height="568"/>
+  
+  <img src="./images/notamatch.png" width="320" height="568"/>
+
+
 ## Licensing
 
 MIT
